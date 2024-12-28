@@ -17,76 +17,59 @@ import Link from "next/link";
 interface ResultsDisplayProps {
   investmentType: InvestmentType;
   asb: {
-    monthlyDeposit: number;
-    monthlyInvestment: any;
     principal: number;
-    dividendRate: number;
+    monthlyInvestment: number;
     tenure: number;
+    dividendRate: number;
     compounding: boolean;
   };
   asbf: {
-    dividendRate: any;
     loanAmount: number;
     loanTenure: number;
     tenure: number;
+    dividendRate: number;
     interestRate: number;
     compounding: boolean;
   };
 }
 
-export function ResultsDisplay({
-  investmentType,
-  asb,
-  asbf,
-}: ResultsDisplayProps) {
-  // Check if the data exists for the active investment type
+
+export function ResultsDisplay({ investmentType, asb, asbf }: ResultsDisplayProps) {
+  // determine active investment type and parameters
   const isAsb = investmentType === "asb";
   const isAsbf = investmentType === "asbf";
 
-  // Ensure that asb or asbf data exists for the selected investment type
+  // dynamically prepare investment parameters
   const investmentParams = isAsb
-    ? {
-      investmentAmount: asb?.principal,
-      dividendRate: asb?.dividendRate,
-      tenure: asb?.tenure,
-      compounding: asb?.compounding || false,
-      monthlyInvestment: asb?.monthlyInvestment,
-    }
+    ? { ...asb }
     : isAsbf
-      ? {
-        investmentAmount: asbf?.loanAmount,
-        interestRate: asbf?.interestRate,
-        loanTenure: asbf?.loanTenure,
-        tenure: asbf?.tenure,
-        compounding: asbf?.compounding || false,
-        dividendRate: asbf?.dividendRate,
-        monthlyInvestment: 0,
-      }
-      : {
-        investmentAmount: 0,
-        dividendRate: 0,
-        tenure: 0,
-        loanTenure: asbf?.loanTenure ?? 0,
-        interestRate: asbf?.interestRate ?? 0,
-        compounding: false,
-        monthlyInvestment: 0,
-      };
+      ? { ...asbf }
+      : null;
 
-  // Calculate results
-  const results = calculateInvestment({
-    type: investmentType,
-    ...investmentParams,
+  if (!investmentParams) return null;
+
+  const mergedParams = {
+    loanTenure: 0,
+    interestRate: 0,
     loanAmount: 0,
     principal: 0,
-    loanTenure: investmentParams.loanTenure ?? 0,
-    interestRate: investmentParams.interestRate ?? 0,
+    monthlyInvestment: 0,
+    investmentAmount: 0,
+    ...investmentParams, // override defaults if values exist
+  };
+
+  // calculate investment results
+  const results = calculateInvestment({
+    type: investmentType,
+    ...mergedParams,
   });
 
-  // Calculate the total investment for the ASB and ASBF cases
-  const totalInvestment =
-    investmentType === "asb"
-      ? asb?.principal + asb?.monthlyDeposit * asb?.tenure * 12
-      : asbf?.loanAmount || 0;
+  // calculate total investment amount
+  const totalInvestment = isAsb
+    ? asb.principal + asb.monthlyInvestment * asb.tenure * 12
+    : isAsbf
+      ? asbf.loanAmount
+      : 0;
 
   return (
     <div className="space-y-6">
@@ -106,18 +89,16 @@ export function ResultsDisplay({
               <TableRow>
                 <TableCell>Total Investment</TableCell>
                 <TableCell className="text-right">
-                  {formatCurrency(results.averageBalance || totalInvestment)}
+                  {formatCurrency(results.totalPrincipal || totalInvestment)}
                 </TableCell>
               </TableRow>
-
               <TableRow>
                 <TableCell>Total Dividends</TableCell>
                 <TableCell className="text-right">
                   {formatCurrency(results.dividend || 0)}
                 </TableCell>
               </TableRow>
-
-              {investmentType === "asbf" && (
+              {isAsbf && (
                 <TableRow>
                   <TableCell>Surrender Value</TableCell>
                   <TableCell className="text-right">
@@ -125,7 +106,6 @@ export function ResultsDisplay({
                   </TableCell>
                 </TableRow>
               )}
-
               <TableRow>
                 <TableCell>Net Profit</TableCell>
                 <TableCell className="text-right">
@@ -134,9 +114,9 @@ export function ResultsDisplay({
               </TableRow>
             </TableBody>
           </Table>
-
           <span className="text-sm text-gray-700">
-            ASB calculates income distribution based on the average monthly minimum balance, not using standard compound interest formulas.{" "}
+            ASB calculates income distribution based on the average monthly
+            minimum balance, not using standard compound interest formulas.{" "}
             <Link
               href="https://www.asnb.com.my/ASBIncomeDistribution_EN.php"
               className="text-blue-500 hover:underline"

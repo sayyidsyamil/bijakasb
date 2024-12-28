@@ -18,8 +18,7 @@ export function Calculator() {
   const [asb, setAsb] = useState({
     principal: 0,
     monthlyInvestment: 500,
-    monthlyDeposit: 500,
-    dividendRate: 5,
+    dividendRate: 5.5,
     tenure: 1,
     compounding: true,
   });
@@ -28,7 +27,7 @@ export function Calculator() {
     loanAmount: 100000,
     loanTenure: 30,
     interestRate: 4.5,
-    dividendRate: 5,
+    dividendRate: 5.5,
     tenure: 3,
     compounding: true,
   });
@@ -40,25 +39,25 @@ export function Calculator() {
 
   // handlers for asb
   const handleAsbChange = useCallback(
-    (key: keyof typeof asb) => (value: number | boolean) => {
+    (key: keyof typeof asb) => (value: string | number | boolean) => {
       setAsb((prev) => ({
         ...prev,
-        [key]: value,
+        [key]: value === "" ? 0 : value, // allow empty string
       }));
     },
     []
   );
 
-  // handlers for asbf
   const handleAsbfChange = useCallback(
-    (key: keyof typeof asbf) => (value: number) => {
+    (key: keyof typeof asbf) => (value: string | number) => {
       setAsbf((prev) => ({
         ...prev,
-        [key]: value,
+        [key]: value === "" ? 0 : value, // allow empty string
       }));
     },
     []
   );
+
 
   return (
     <section id="calculator" className="py-12">
@@ -80,15 +79,20 @@ export function Calculator() {
                       <Input
                         id="asb-principal"
                         type="number"
-                        value={asb.principal}
-                        onChange={(e) => handleAsbChange("principal")(Number(e.target.value))}
+                        value={asb.principal === 0 ? "" : asb.principal}
+                        onChange={(e) => handleAsbChange("principal")(e.target.value)}
+                        placeholder="0"
+                        onBlur={() => handleAsbChange("principal")(asb.principal === 0 ? 0 : asb.principal)} // reset to 0 on blur if empty
                       />
+
                       <Label htmlFor="asb-monthly">Monthly Deposit (RM)</Label>
                       <Input
                         id="asb-monthly"
                         type="number"
-                        value={asb.monthlyInvestment}
-                        onChange={(e) => handleAsbChange("monthlyInvestment")(Number(e.target.value))}
+                        value={asb.monthlyInvestment === 0 ? "" : asb.monthlyInvestment}
+                        onChange={(e) => handleAsbChange("monthlyInvestment")(e.target.value)}
+                        placeholder="0"
+                        onBlur={() => handleAsbChange("monthlyInvestment")(asb.monthlyInvestment === 0 ? 0 : asb.monthlyInvestment)} // reset to 0 on blur if empty
                       />
                       <RateInput
                         label="Investment Period (Years)"
@@ -106,14 +110,16 @@ export function Calculator() {
 
                     </>
                   )}
-                  {( activeTab === "asbf" || activeTab === "compare" ) && (
+                  {(activeTab === "asbf" || activeTab === "compare") && (
                     <>
                       <Label htmlFor="asbf-loan">Loan Amount (RM)</Label>
                       <Input
                         id="asbf-loan"
                         type="number"
-                        value={asbf.loanAmount}
-                        onChange={(e) => handleAsbfChange("loanAmount")(Number(e.target.value))}
+                        value={asbf.loanAmount === 0 ? "" : asbf.loanAmount}
+                        onChange={(e) => handleAsbfChange("loanAmount")(e.target.value)}
+                        placeholder="0"
+                        onBlur={() => handleAsbfChange("loanAmount")(asbf.loanAmount === 0 ? 0 : asbf.loanAmount)} // reset to 0 on blur if empty
                       />
                       <RateInput
                         label="Loan Period (Years)"
@@ -141,30 +147,30 @@ export function Calculator() {
                         value={asbf.interestRate}
                         onChange={handleAsbfChange("interestRate")}
                       />
-                      
+
                     </>
-                  
+
                   )}
                   <div className="flex items-center space-x-2">
-                        <Label htmlFor="asb-compounding">Compounding</Label>
-                        <Switch
-                          id="asb-compounding"
-                          checked={asb.compounding}
-                          onCheckedChange={(checked) => handleAsbChange("compounding")(checked)}
-                        />
-                      </div>
+                    <Label htmlFor="asb-compounding">Compounding</Label>
+                    <Switch
+                      id="asb-compounding"
+                      checked={asb.compounding}
+                      onCheckedChange={(checked) => handleAsbChange("compounding")(checked)}
+                    />
+                  </div>
                 </div>
 
               </CardContent>
             </Card>
             {activeTab === "compare" ? (
-              <ComparisonView 
+              <ComparisonView
                 loanAmount={asbf.loanAmount}
                 loanTenure={asbf.loanTenure}
                 tenure={asbf.tenure}
                 interestRate={asbf.interestRate}
                 dividendRate={asbf.dividendRate}
-                compounding={asbf.compounding} type={"compare"} principal={0} monthlyInvestment={0} investmentAmount={0}              />
+                compounding={asbf.compounding} type={"compare"} principal={0} monthlyInvestment={0} investmentAmount={0} />
             ) : (
               <ResultsDisplay
                 investmentType={activeTab}
