@@ -1,7 +1,7 @@
 import { InvestmentParams, InvestmentResults, ComparisonResult } from "./types";
 
 // helper function to calculate yearly balance with compounding
-export function calculateAsbDividend(principal: number, monthlyInvestment: number, tenure: number, dividendRate: number, compounding: boolean): { totalPrincipal: number, dividend: number, netProfit: number, monthlypayment: number } {
+export function calculateAsbDividend({ principal, monthlyInvestment, tenure, dividendRate, compounding }: { principal: number; monthlyInvestment: number; tenure: number; dividendRate: number; compounding: boolean; }): { totalPrincipal: number, dividend: number, netProfit: number, monthlypayment: number } {
 
   principal = Number(principal);
   monthlyInvestment = Number(monthlyInvestment);
@@ -41,7 +41,7 @@ export function calculateAsbDividend(principal: number, monthlyInvestment: numbe
 
 
 
-export function calculateAsbfDividend(loanAmount: number, loanTenure: number, tenure: number, interestRate: number, dividendRate: number, compounding: boolean): { monthlypayment: number, dividend: number, surrendervalue: number, netProfit: number } {
+export function calculateAsbfDividend({ loanAmount, loanTenure, tenure, interestRate, dividendRate, compounding }: { loanAmount: number; loanTenure: number; tenure: number; interestRate: number; dividendRate: number; compounding: boolean; }): { monthlypayment: number, dividend: number, surrendervalue: number, netProfit: number } {
 
   const totalPayments = loanTenure * 12;
   interestRate = interestRate / 100;
@@ -86,15 +86,13 @@ export function calculateInvestment(params: InvestmentParams): InvestmentResults
     monthlyInvestment,
   } = params;
 
-  console.log("params", params);
 
   if (type === "asb") {
-    const result = calculateAsbDividend(params.principal, params.monthlyInvestment, params.tenure, params.dividendRate, params.compounding);
+    const result = calculateAsbDividend({ principal: params.principal, monthlyInvestment: params.monthlyInvestment, tenure: params.tenure, dividendRate: params.dividendRate, compounding: params.compounding });
     const averageBalance = result.totalPrincipal;
     const totalDividends = result.dividend;
     const netProfit = totalDividends + averageBalance;
 
-    console.log("info",averageBalance,totalDividends, netProfit )
     return {
       totalPrincipal: averageBalance,
       dividend: totalDividends,
@@ -102,7 +100,7 @@ export function calculateInvestment(params: InvestmentParams): InvestmentResults
       monthlypayment: 0, // Add default value for monthlypayment
     };
   } else if (type === "asbf") {
-    const result = calculateAsbfDividend(params.loanAmount, params.loanTenure, params.tenure, params.interestRate, params.dividendRate, params.compounding);
+    const result = calculateAsbfDividend({ loanAmount: params.loanAmount, loanTenure: params.loanTenure, tenure: params.tenure, interestRate: params.interestRate, dividendRate: params.dividendRate, compounding: params.compounding });
     const monthlyPayment = result.monthlypayment;
     const totalDividends = result.dividend;
     const surrendervalue = result.surrendervalue;

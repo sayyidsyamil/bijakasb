@@ -30,17 +30,17 @@ export function ComparisonView({
   const monthlyPayment = calculateLoanMonthlyPayment(loanAmount, loanTenure, interestRate);
 
   const asbResults = {
-    totalPrincipal: calculateAsbDividend(0, monthlyPayment, tenure, dividendRate , compounding).totalPrincipal,
-    dividend: calculateAsbDividend(0, monthlyPayment, tenure, dividendRate , compounding).dividend,
-    netProfit: calculateAsbDividend(0, monthlyPayment, tenure, dividendRate , compounding).netProfit, // or any appropriate value
+    totalPrincipal: calculateAsbDividend({ principal: 0, monthlyInvestment: monthlyPayment, tenure, dividendRate, compounding }).totalPrincipal,
+    dividend: calculateAsbDividend({ principal: 0, monthlyInvestment: monthlyPayment, tenure, dividendRate, compounding }).dividend,
+    netProfit: calculateAsbDividend({ principal: 0, monthlyInvestment: monthlyPayment, tenure, dividendRate, compounding }).netProfit, // or any appropriate value
     monthlypayment: monthlyPayment,
   };
   const asbfResults = {
     totalPrincipal: loanAmount,
-    monthlypayment: calculateAsbfDividend(loanAmount, loanTenure, tenure, interestRate , dividendRate , compounding).monthlypayment,
-    surrendervalue: calculateAsbfDividend(loanAmount, loanTenure, tenure, interestRate , dividendRate , compounding).surrendervalue,
-    dividend: calculateAsbfDividend(loanAmount, loanTenure, tenure, interestRate , dividendRate , compounding).dividend,
-    netProfit: calculateAsbfDividend(loanAmount, loanTenure, tenure, interestRate , dividendRate , compounding).netProfit, // or any appropriate value
+    monthlypayment: calculateAsbfDividend({ loanAmount, loanTenure, tenure, interestRate, dividendRate, compounding }).monthlypayment,
+    surrendervalue: calculateAsbfDividend({ loanAmount, loanTenure, tenure, interestRate, dividendRate, compounding }).surrendervalue,
+    dividend: calculateAsbfDividend({ loanAmount, loanTenure, tenure, interestRate, dividendRate, compounding }).dividend,
+    netProfit: calculateAsbfDividend({ loanAmount, loanTenure, tenure, interestRate, dividendRate, compounding }).netProfit, // or any appropriate value
   };
 
   const {difference, asbfBetter, breakEvenRate }  = compareInvestments({
@@ -97,7 +97,7 @@ export function ComparisonView({
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell>Net</TableCell>
+                <TableCell>Balance After {tenure} Year</TableCell>
                 <TableCell className="text-right">
                   {formatCurrency(asbResults?.netProfit ?? 0)}
                 </TableCell>

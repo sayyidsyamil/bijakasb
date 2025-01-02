@@ -107,7 +107,7 @@ export function ResultsDisplay({ investmentType, asb, asbf }: ResultsDisplayProp
                 </TableRow>
               )}
               <TableRow>
-                <TableCell>Net Profit</TableCell>
+                <TableCell>Balance After {investmentParams.tenure} Year</TableCell>
                 <TableCell className="text-right">
                   {formatCurrency(results.netProfit || 0)}
                 </TableCell>
