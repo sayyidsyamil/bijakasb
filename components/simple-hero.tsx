@@ -28,7 +28,7 @@ export function SimpleHero() {
           </div>
           
           <div className="flex items-center gap-2 mb-4">
-            <Calculator className="h-8 w-8 text-primary" />
+            <Calculator className="h-8 w-8 text-primary md:block hidden" />
             <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
               ASB vs ASBF Calculator
             </h1>

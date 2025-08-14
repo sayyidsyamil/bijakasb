@@ -402,29 +402,16 @@ export function SimpleCalculator() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="compare-monthly">Monthly Investment (RM)</Label>
-                        <Input
-                          id="compare-monthly"
-                          type="number"
-                          value={asb.monthlyInvestment === 0 ? "" : asb.monthlyInvestment}
-                          onChange={(e) => handleAsbChange("monthlyInvestment")(e.target.value)}
-                          placeholder="500"
-                          className="mt-1"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="compare-loan">Loan Amount (RM)</Label>
-                        <Input
-                          id="compare-loan"
-                          type="number"
-                          value={asbf.loanAmount === 0 ? "" : asbf.loanAmount}
-                          onChange={(e) => handleAsbfChange("loanAmount")(e.target.value)}
-                          placeholder="100000"
-                          className="mt-1"
-                        />
-                      </div>
+                    <div>
+                      <Label htmlFor="compare-loan">Loan Amount (RM)</Label>
+                      <Input
+                        id="compare-loan"
+                        type="number"
+                        value={asbf.loanAmount === 0 ? "" : asbf.loanAmount}
+                        onChange={(e) => handleAsbfChange("loanAmount")(e.target.value)}
+                        placeholder="100000"
+                        className="mt-1"
+                      />
                     </div>
 
                     <RateInput
