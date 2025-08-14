@@ -10,7 +10,7 @@ export interface InvestmentParams {
   loanAmount: number;
   principal: number;
   monthlyInvestment: number;
-  investmentAmount: number,
+  investmentAmount: number;
 }
 
 export interface InvestmentResults {
@@ -19,17 +19,6 @@ export interface InvestmentResults {
   netProfit: number;
   monthlypayment: number;
   surrendervalue?: number;
-  averageBalance?: number;
-  monthlyPayment?: number;
   remainingBalance?: number;  
   investmentAmount?: number;
-
-}
-
-export interface ComparisonResult {
-  asbResults: InvestmentResults;
-  asbfResults: InvestmentResults;
-  difference: number;
-  asbfBetter: boolean;
-  breakEvenRate: number;
 }

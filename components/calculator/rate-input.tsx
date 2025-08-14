@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface RateInputProps {
   label: string;
@@ -13,6 +14,7 @@ interface RateInputProps {
   max?: number;
   step?: number;
   tooltip?: string;
+  variant?: "default" | "red";
 }
 
 export function RateInput({
@@ -23,6 +25,7 @@ export function RateInput({
   max = 100,
   step = 0.1,
   tooltip,
+  variant = "default",
 }: RateInputProps) {
   const [inputValue, setInputValue] = useState(value.toString());
 
@@ -60,6 +63,7 @@ export function RateInput({
         step={step}
         value={[value]}
         onValueChange={handleSliderChange}
+        variant={variant}
       />
     </div>
   );

@@ -1,8 +1,7 @@
-import { InvestmentParams, InvestmentResults, ComparisonResult } from "./types";
+import { InvestmentParams, InvestmentResults } from "./types";
 
 // Utility functions
 const convertToDecimal = (percentage: number): number => percentage / 100;
-const convertToPercentage = (decimal: number): number => decimal * 100;
 
 // Loan calculation utilities
 export function calculateLoanMonthlyPayment(loanAmount: number, loanTenure: number, interestRate: number): number {
@@ -47,7 +46,7 @@ export class AsbCalculator {
     
     let runningBalance = totalPrincipal;
     let totalDividend = 0;
-    
+
     for (let month = 1; month <= months; month++) {
       // Add monthly deposit
       runningBalance += monthlyDeposit;
@@ -65,7 +64,7 @@ export class AsbCalculator {
     }
     
     const finalPrincipal = totalPrincipal + (monthlyDeposit * months);
-    
+
     return {
       totalPrincipal: finalPrincipal,
       dividend: totalDividend,
@@ -93,7 +92,7 @@ export class AsbfCalculator {
     
     const totalDividends = loanAmount * convertToDecimal(dividendRate) * tenure;
     const surrenderValue = loanAmount - remainingBalance;
-    
+
     return {
       monthlyPayment,
       dividend: totalDividends,
@@ -116,7 +115,7 @@ export function calculateInvestment(params: InvestmentParams): InvestmentResults
         dividendRate: params.dividendRate,
         compounding: params.compounding,
       });
-      
+
       return {
         totalPrincipal: asbResult.totalPrincipal,
         dividend: asbResult.dividend,
@@ -133,7 +132,7 @@ export function calculateInvestment(params: InvestmentParams): InvestmentResults
         dividendRate: params.dividendRate,
         compounding: params.compounding,
       });
-      
+
       return {
         totalPrincipal: 0,
         dividend: asbfResult.dividend,
@@ -161,7 +160,7 @@ export class ComparisonCalculator {
   ): { difference: number; asbfBetter: boolean; breakEvenRate: number; percentageDifference: number } {
     const asbfBetter = asbfResults.netProfit > asbResults.netProfit;
     const difference = Math.abs(asbfResults.netProfit - asbResults.netProfit);
-    
+
     // Calculate percentage difference
     const percentageDifference = asbResults.netProfit > 0 
       ? ((asbfResults.netProfit - asbResults.netProfit) / asbResults.netProfit) * 100
@@ -169,7 +168,7 @@ export class ComparisonCalculator {
     
     // Calculate breakeven rate using binary search
     const breakEvenRate = this.calculateBreakEvenRate(params, asbfResults.netProfit);
-    
+
     return {
       difference,
       asbfBetter,
@@ -209,24 +208,6 @@ export class ComparisonCalculator {
     
     return (low + high) / 2;
   }
-}
-
-// Legacy function for backward compatibility
-export function compareInvestments(
-  params: InvestmentParams,
-  asbResults: InvestmentResults,
-  asbfResults: InvestmentResults
-): { difference: number; asbfBetter: boolean; breakEvenRate: number; percentageDifference: number } {
-  return ComparisonCalculator.calculate(params, asbResults, asbfResults);
-}
-
-// Legacy functions for backward compatibility
-export function calculateAsbDividend(params: any) {
-  return AsbCalculator.calculate(params);
-}
-
-export function calculateAsbfDividend(params: any) {
-  return AsbfCalculator.calculate(params);
 }
 
 
