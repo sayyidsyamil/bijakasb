@@ -10,12 +10,20 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { compareInvestments, calculateLoanMonthlyPayment, calculateAsbDividend,calculateAsbfDividend } from "@/lib/calculations";
+import { AsbCalculator, AsbfCalculator, ComparisonCalculator, calculateLoanMonthlyPayment } from "@/lib/calculations";
 import { InvestmentParams } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
-interface ComparisonViewProps extends InvestmentParams {}
+interface ComparisonViewProps {
+  loanAmount: number;
+  loanTenure: number;
+  tenure: number;
+  interestRate: number;
+  dividendRate: number;
+  compounding: boolean;
+  type: string;
+}
 
 export function ComparisonView({
   loanAmount,
@@ -26,30 +34,63 @@ export function ComparisonView({
   compounding,
   type,
 }: ComparisonViewProps) {
-
+  // Calculate monthly payment once
   const monthlyPayment = calculateLoanMonthlyPayment(loanAmount, loanTenure, interestRate);
 
+  // Calculate ASB results once
+  const asbResult = AsbCalculator.calculate({
+    principal: 0,
+    monthlyInvestment: monthlyPayment,
+    tenure,
+    dividendRate,
+    compounding,
+  });
+
+  // Calculate ASBF results once
+  const asbfResult = AsbfCalculator.calculate({
+    loanAmount,
+    loanTenure,
+    tenure,
+    interestRate,
+    dividendRate,
+    compounding,
+  });
+
+  // Format results for display
   const asbResults = {
-    totalPrincipal: calculateAsbDividend({ principal: 0, monthlyInvestment: monthlyPayment, tenure, dividendRate, compounding }).totalPrincipal,
-    dividend: calculateAsbDividend({ principal: 0, monthlyInvestment: monthlyPayment, tenure, dividendRate, compounding }).dividend,
-    netProfit: calculateAsbDividend({ principal: 0, monthlyInvestment: monthlyPayment, tenure, dividendRate, compounding }).netProfit, // or any appropriate value
+    totalPrincipal: asbResult.totalPrincipal,
+    dividend: asbResult.dividend,
+    netProfit: asbResult.netProfit,
     monthlypayment: monthlyPayment,
   };
+
   const asbfResults = {
     totalPrincipal: loanAmount,
-    monthlypayment: calculateAsbfDividend({ loanAmount, loanTenure, tenure, interestRate, dividendRate, compounding }).monthlypayment,
-    surrendervalue: calculateAsbfDividend({ loanAmount, loanTenure, tenure, interestRate, dividendRate, compounding }).surrendervalue,
-    dividend: calculateAsbfDividend({ loanAmount, loanTenure, tenure, interestRate, dividendRate, compounding }).dividend,
-    netProfit: calculateAsbfDividend({ loanAmount, loanTenure, tenure, interestRate, dividendRate, compounding }).netProfit, // or any appropriate value
+    monthlypayment: asbfResult.monthlyPayment,
+    surrendervalue: asbfResult.surrenderValue,
+    dividend: asbfResult.dividend,
+    netProfit: asbfResult.netProfit,
   };
 
-  const {difference, asbfBetter, breakEvenRate }  = compareInvestments({
-    loanAmount, loanTenure, tenure, interestRate, dividendRate, compounding, type,
-    principal: 0, // or any appropriate value
+  // Calculate comparison once
+  const comparisonParams: InvestmentParams = {
+    loanAmount,
+    loanTenure,
+    tenure,
+    interestRate,
+    dividendRate,
+    compounding,
+    type: type as any,
+    principal: 0,
     monthlyInvestment: monthlyPayment,
-    investmentAmount: loanAmount
-  }, asbResults, asbfResults);
+    investmentAmount: loanAmount,
+  };
 
+  const { difference, asbfBetter, breakEvenRate, percentageDifference } = ComparisonCalculator.calculate(
+    comparisonParams,
+    asbResults,
+    asbfResults
+  );
 
   return (
     <div className="space-y-6 ">
@@ -71,38 +112,37 @@ export function ComparisonView({
                 <TableCell>Total Investment</TableCell>
                 <TableCell className="text-right">
                   <div className="grid grid-rows-2 ">
-                  {formatCurrency(asbResults?.totalPrincipal ?? 0)}
-                  <Badge className="ml-auto w-fit">RM {monthlyPayment.toFixed(2)}/ month</Badge>
+                    {formatCurrency(asbResults.totalPrincipal)}
+                    <Badge className="ml-auto w-fit">RM {monthlyPayment.toFixed(2)}/ month</Badge>
                   </div>
-             
                 </TableCell>
                 <TableCell className="text-right">
-                  {formatCurrency(loanAmount ?? 0)}
+                  {formatCurrency(loanAmount)}
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>Total Dividends</TableCell>
                 <TableCell className="text-right">
-                  {formatCurrency(asbResults?.dividend ?? 0)}
+                  {formatCurrency(asbResults.dividend)}
                 </TableCell>
                 <TableCell className="text-right">
-                  {formatCurrency(asbfResults?.dividend ?? 0)}
+                  {formatCurrency(asbfResults.dividend)}
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>Surrender Value</TableCell>
                 <TableCell className="text-right">-</TableCell>
                 <TableCell className="text-right">
-                  {formatCurrency(asbfResults?.surrendervalue ?? 0)}
+                  {formatCurrency(asbfResults.surrendervalue)}
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>Balance After {tenure} Year</TableCell>
                 <TableCell className="text-right">
-                  {formatCurrency(asbResults?.netProfit ?? 0)}
+                  {formatCurrency(asbResults.netProfit)}
                 </TableCell>
                 <TableCell className="text-right">
-                  {formatCurrency(asbfResults?.netProfit ?? 0)}
+                  {formatCurrency(asbfResults.netProfit)}
                 </TableCell>
               </TableRow>
             </TableBody>
@@ -112,12 +152,12 @@ export function ComparisonView({
             <AlertDescription className="text-sm text-gray-700">
               {asbfBetter ? (
                 <>
-                  ASBF is better by {formatCurrency(difference)}. ASB would need a dividend rate of{" "}
+                  ASBF is better by {formatCurrency(difference)} ({percentageDifference.toFixed(1)}% better). ASB would need a dividend rate of{" "}
                   {breakEvenRate?.toFixed(2)}% to match ASBF returns.
                 </>
               ) : (
                 <>
-                  ASB is better by {formatCurrency(difference)}. Consider ASB if you prefer lower risk and simpler investment management.
+                  ASB is better by {formatCurrency(difference)} ({percentageDifference.toFixed(1)}% better). Consider ASB if you prefer lower risk and simpler investment management.
                 </>
               )}
             </AlertDescription>
